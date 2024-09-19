@@ -3,16 +3,10 @@ package erik.chatinyan.ameriatest
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -37,19 +31,26 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainNavHost(
     modifier: Modifier = Modifier,
-    mainNavController: NavHostController = rememberNavController(),
+    navController: NavHostController = rememberNavController(),
 ) {
     NavHost(
-        modifier = modifier, navController = mainNavController, startDestination = SCREEN_USER_LIST
+        modifier = modifier, navController = navController, startDestination = SCREEN_USER_LIST
     ) {
         composable(SCREEN_USER_LIST) {
-            UserListScreen()
+            UserListScreen(
+                navController = navController
+            )
         }
-        composable(SCREEN_USER_DETAILS) {
-            UserDetailsScreen()
+        composable(SCREEN_USER_DETAILS + "/{$ARGUMENT_SCREEN_USER_DETAILS_LOGIN}") { backstackEntry ->
+            val login = backstackEntry.arguments?.getString(ARGUMENT_SCREEN_USER_DETAILS_LOGIN) ?: ""
+            UserDetailsScreen(
+                login = login,
+                navController = navController
+            )
         }
     }
 }
 
-const val SCREEN_USER_LIST = "userlist"
-const val SCREEN_USER_DETAILS = "userlist"
+const val SCREEN_USER_LIST = "user_list"
+const val SCREEN_USER_DETAILS = "user_details"
+const val ARGUMENT_SCREEN_USER_DETAILS_LOGIN = "login"
