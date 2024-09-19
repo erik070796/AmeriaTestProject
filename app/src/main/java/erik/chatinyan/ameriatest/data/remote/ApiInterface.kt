@@ -1,6 +1,5 @@
 package erik.chatinyan.ameriatest.data.remote
 
-import erik.chatinyan.ameriatest.data.remote.model.ResponseUserList
 import erik.chatinyan.ameriatest.data.remote.model.UserDetails
 import erik.chatinyan.ameriatest.data.remote.model.UserListItem
 import retrofit2.Response

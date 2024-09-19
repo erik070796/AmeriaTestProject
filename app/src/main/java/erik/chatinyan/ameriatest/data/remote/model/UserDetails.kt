@@ -8,10 +8,10 @@ data class UserDetails(
 	val bio: String? = null,
 
 	@field:SerializedName("login")
-	val login: String? = null,
+	val login: String,
 
 	@field:SerializedName("id")
-	val id: Int? = null,
+	val id: Int,
 
 	@field:SerializedName("followers")
 	val followers: Int? = null,
@@ -27,4 +27,13 @@ data class UserDetails(
 
 	@field:SerializedName("location")
 	val location: String? = null,
+
+	@field:SerializedName("updated_at")
+	val updatedAt: String? = null,
+
+	@field:SerializedName("public_gists")
+	val publicGists: Int? = null,
+
+	@field:SerializedName("public_repos")
+	val publicRepos: Int? = null,
 )

@@ -1,38 +1,48 @@
 package erik.chatinyan.ameriatest.ui.screens.user_list
 
 import android.app.Application
-import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.lifecycle.viewModelScope
 import erik.chatinyan.ameriatest.data.remote.ResultWrapper
+import erik.chatinyan.ameriatest.data.remote.model.UserListItem
 import erik.chatinyan.ameriatest.data.repo.UserRepository
-import erik.chatinyan.ameriatest.di.viewModelModule
 import erik.chatinyan.ameriatest.ui.base.BaseViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class UserListViewModel(
     application: Application,
     private val userRepository: UserRepository,
-    ) : BaseViewModel<UserListViewModel.Action, UserListViewModel.Effect, UserListViewModel.State>(
+) : BaseViewModel<UserListViewModel.Action, UserListViewModel.Effect, UserListViewModel.State>(
     application = application,
     initialState = State()
 ) {
     data class State(
-        val list: List<String> = emptyList(),
+        val list: List<UserListItem> = emptyList(),
     )
 
     sealed class Action {
-        object EmptyAction : Action()
+        object RefreshData : Action()
+        class UserItemClicked(val login: String) : Action()
     }
 
     sealed class Effect {
-        object ShowLoading : Effect()
+        object ShowNetworkError : Effect()
+        class ShowError(val code: Int, val message: String) : Effect()
+        class NavigateToUserDetails(val login: String) : Effect()
     }
 
     override fun handleAction(action: Action) {
         when (action) {
-            is Action.EmptyAction -> {
+            is Action.UserItemClicked -> {
+                obtainEffect {
+                    Effect.NavigateToUserDetails(action.login)
+                }
+            }
+            Action.RefreshData ->{
+                viewModelScope.launch {
+                    delay(700)
+                    getUserList()
+                }
             }
         }
     }
@@ -41,21 +51,27 @@ class UserListViewModel(
         getUserList()
     }
 
-    fun getUserList(){
+    private fun getUserList() {
         viewModelScope.launch {
             val response = userRepository.getUserList()
 
             when (response) {
-                is ResultWrapper.GenericError ->{
-                    // show error
+                is ResultWrapper.GenericError -> {
+                    obtainEffect {
+                        Effect.ShowError(response.code ?: 0, response.error ?: "Empty Error")
+                    }
                 }
 
                 is ResultWrapper.NetworkException -> {
-                   // show network error
+                    obtainEffect {
+                        Effect.ShowNetworkError
+                    }
                 }
                 is ResultWrapper.Success -> {
-                  val userList = response.value
-                    userList
+                    val userList = response.value
+                    obtainState {
+                        copy(list = userList)
+                    }
                 }
             }
         }
